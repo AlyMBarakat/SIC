@@ -26,7 +26,6 @@ public class Assembler {
     static File code = new File("srcCode.txt");
     static File intermdiate = new File("intermdiate.txt");
    
-    
     //SrcLine variables
     static ArrayList label = new ArrayList();
     static ArrayList opCode = new ArrayList();
@@ -101,9 +100,9 @@ public class Assembler {
                 startingAdd = Integer.parseInt((String)operand.get(i),16);
                 locCtr = startingAdd;
                 writer.write((String)label.get(i) + "\t" +(String) opCode.get(i) + "\t" +(String) operand.get(i) + "\t" + Integer.toHexString(locCtr) + "\n");
-                locCtr -= 3;
                 //DEBUG
                 System.out.println((String) label.get(i) + "\t" + (String) opCode.get(i) + "\t" + (String) operand.get(i) + "\t" + locCtr );
+                locCtr -= 3;
             }
             else
             {
@@ -207,9 +206,8 @@ public class Assembler {
         }   //End try Buffer writer 
     }//End pass1
     
-    
     public void pass2() throws FileNotFoundException, IOException
-    {   
+    {
         //i: file line pointer
         int i = 0;
         //t: record pointer
@@ -232,8 +230,8 @@ public class Assembler {
             {
                 writer.write("H" + "\t");
                 writer.write((String)label.get(i) + "\t");
-                writer.write(decimalToHex6(startingAdd)+ "\t");
-                writer.write(decimalToHex6(progLength));
+                writer.write(decimalToHex(startingAdd, 6)+ "\t");
+                writer.write(decimalToHex(progLength, 6));
                 i++;
             }
                      
@@ -278,26 +276,26 @@ public class Assembler {
                             System.out.println(temp);
                             //address + 8000HEX
                             int y = Integer.parseInt(symTab.get(temp)) + 32768;
-                            System.out.println(decimalToHex4(y));
-                            holder = holder.concat(decimalToHex4(y));
+                            System.out.println(decimalToHex(y,4));
+                            holder = holder.concat(decimalToHex(y,4));
                         }
                         else
                         {
                             holder = opTab.get((String) opCode.get(i));
                             holder = holder.concat("0000");
-                            System.out.println(holder);  
+                            System.out.println(holder);
 
                         }
                         record.add(holder);
-                        recordAddress.add(hexToHex6((String)address.get(i)));
+                        recordAddress.add(hexToHex((String)address.get(i), 6 ));
                         t++;
                     }
                     else if("WORD".equals((String)opCode.get(i)))
                     {  
                         int n = Integer.parseInt((String)operand.get(i));
-                        holder = decimalToHex6(n);
+                        holder = decimalToHex(n, 6);
                         record.add(holder);
-                        recordAddress.add(hexToHex6((String)address.get(i)));
+                        recordAddress.add(hexToHex((String)address.get(i), 6));
                         t++;
                         
                         //DEBUG
@@ -310,21 +308,21 @@ public class Assembler {
                         String op = (String)operand.get(i);
                         if(op.contains("C'"))
                         {
-                            holder = decimalToHex6(op.length()-3);
+                            holder = decimalToHex(op.length()-3, 6);
                             
                         }
                         else if(op.contains("X'"))
                         {
                             String hex = "";
                             hex = op.substring(2, op.length()-2);  
-                            holder = decimalToHex6(Integer.parseInt(hex,16));
+                            holder = decimalToHex(Integer.parseInt(hex,16), 6);
                         }
                         else
                         {
-                            holder = decimalToHex6(Integer.parseInt((String)operand.get(i)));
+                            holder = decimalToHex(Integer.parseInt((String)operand.get(i)),6);
                         }
                         record.add(holder);
-                        recordAddress.add(hexToHex6((String)address.get(i)));
+                        recordAddress.add(hexToHex((String)address.get(i), 6));
                         t++;
                         //DEBUG
                         //System.out.println("BYTE: " + holder + "adress = " + hexToHex6((String)address.get(i)));
@@ -364,32 +362,21 @@ public class Assembler {
                 else
                 {
                     writer.write("\nE" + "\t");
-                    writer.write(decimalToHex6(startingAdd));
+                    writer.write(decimalToHex(startingAdd,6));
                     System.out.println("Symbol table = " + symTab.toString());
                 } 
             }   //End While has next line
         }   //End try Buffer writer
     }   //End pass 2
     
-    //Convert decimal to HEX string 6 bits
-    public String decimalToHex6(int x)
-    {
-        String hex = Integer.toHexString(x);
-        String val = "";
-        for(int i = 0; i < 6-hex.length();i++)
-        {
-            val = val.concat("0");
-        }
-        val = val.concat(hex);
-        return val.toUpperCase() ;
-    }
+ 
     
-    //Convert decimal to HEX string 6 bits
-    public String decimalToHex4(int x)
+    //Convert decimal to HEX string n bits
+    public String decimalToHex(int x,int  n)
     {
         String hex = Integer.toHexString(x);
         String val = "";
-        for(int i = 0; i < 4-hex.length();i++)
+        for(int i = 0; i < n-hex.length();i++)
         {
             val = val.concat("0");
         }
@@ -398,16 +385,15 @@ public class Assembler {
     }
     
     
-    
-    
-    public String hexToHex6(String hex)
+    public String hexToHex(String hex, int n)
     {
         String val = "";
-        for(int i = 0; i < 6-hex.length(); i++)
+        for(int i = 0; i < n-hex.length(); i++)
         {
             val = val.concat("0");
         }
         val = val.concat(hex);
         return val.toUpperCase();
-    }  
+    }
+    
 }   //End Assembler()
